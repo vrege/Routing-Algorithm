@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grocery Delivery Co. — Routing Algorithm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --orange:#FF6723;--dark:#1C2028;--medium:#3D4852;--muted:#8A9099;
+  --bg:#FAFAFA;--bg-light:#F0F1F2;--bg-warm:#F5EDE4;--white:#FFFFFF;
+  --success:#00B050;--success-dark:#003D29;--error:#CC3333;
+  --success-bg:#EEF8F3;--success-border:#9FDCBC;
+  --border:#E2E5E9;--border-light:#ECEEF0;
+  --radius:10px;--radius-sm:6px;
+}
+html{font-family:'DM Sans',sans-serif;font-size:14px;color:var(--dark);background:var(--bg)}
+body{min-height:100vh}
+.nav{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.nav-inner{max-width:1060px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:12px}
+.nav-brand{display:flex;align-items:center;gap:8px;padding:14px 0}
+.nav-dot{width:28px;height:28px;background:var(--orange);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.nav-dot svg{width:16px;height:16px;fill:white}
+.nav-name{font-size:13px;font-weight:600;color:var(--dark)}
+.nav-sub{font-size:11px;color:var(--muted)}
+.nav-tag{padding:3px 10px;border-radius:20px;background:var(--bg-warm);border:1px solid #E8CEBA;font-size:11px;font-weight:500;color:var(--orange)}
+.page{max-width:1060px;margin:0 auto;padding:28px 24px 60px}
+.ph-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.ph-title{font-size:22px;font-weight:600;color:var(--dark);line-height:1.25;margin-bottom:4px;letter-spacing:-.02em}
+.ph-sub{font-size:13px;color:var(--medium);margin-bottom:20px}
+.preset-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.preset-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--white);font-size:12px;font-weight:500;color:var(--medium);cursor:pointer;font-family:inherit;transition:all .12s}
+.preset-btn:hover{border-color:var(--orange);color:var(--orange);background:var(--bg-warm)}
+.rt-banner{border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 14px;margin-bottom:16px;font-size:12.5px;background:var(--bg-light);transition:all .2s;line-height:1.5}
+.rt-banner.win{background:var(--success-bg);border-color:var(--success-border)}
+.rt-banner-label{font-weight:600;color:var(--dark)}
+.rt-banner-reason{color:var(--medium)}
+.rt-layout{display:flex;gap:12px;align-items:flex-start}
+.rt-inputs{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px}
+.rt-arrow{width:20px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:80px}
+.rt-outcomes{width:220px;flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+.rt-bkt{background:var(--white);border:1px solid var(--border-light);border-radius:var(--radius);padding:10px 12px;transition:border-color .2s,box-shadow .2s}
+.rt-bkt.fault{border-color:var(--error);box-shadow:0 0 0 3px rgba(204,51,51,.08)}
+.rt-bkt-hd{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:9px;display:flex;align-items:center;gap:6px;transition:color .2s}
+.rt-bkt.fault .rt-bkt-hd{color:var(--error)}
+.rt-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.rt-badge{font-size:9px;padding:1px 5px;border-radius:3px;background:#FFF3DC;color:#B07800;font-weight:500;border:none}
+.rt-badge.gate{background:#FDE8E8;color:var(--error)}
+.rt-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;flex-wrap:wrap}
+.rt-row:last-child{margin-bottom:0}
+.rt-lbl{font-size:10px;color:var(--muted);width:64px;flex-shrink:0;line-height:1.4;display:flex;align-items:center;gap:3px}
+.rt-chip{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;border:1px solid var(--border);font-size:11px;color:var(--medium);background:var(--bg-light);cursor:pointer;user-select:none;transition:all .12s;white-space:nowrap;font-family:inherit}
+.rt-chip:hover{border-color:var(--dark);color:var(--dark)}
+.rt-chip.on{background:#EAF0FF;border-color:#9BB3F0;color:#3059C7}
+.rt-chip.gy{background:var(--success-bg);border-color:var(--success-border);color:var(--success-dark);font-weight:500}
+.rt-chip.gn{background:#FDE8E8;border-color:#F0AAAA;color:var(--error);font-weight:500}
+.rt-oc{background:var(--white);border:1px solid var(--border-light);border-left:3px solid transparent;border-radius:var(--radius);padding:10px 12px;transition:all .2s}
+.rt-oc.win-r{border-left-color:var(--success);background:var(--success-bg)}
+.rt-oc.win-h{border-left-color:var(--muted);background:var(--bg-light)}
+.rt-oc.dim{opacity:.28;pointer-events:none}
+.rt-oc-title{font-size:12.5px;font-weight:600;color:var(--dark)}
+.rt-oc-desc{font-size:11px;color:var(--medium);margin:3px 0 0;line-height:1.4}
+.rt-roles{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap}
+.rt-role{font-size:10px;padding:2px 7px;border-radius:10px;border:1px solid var(--border-light)}
+.rt-role.y{background:var(--success-bg);border-color:var(--success-border);color:var(--success-dark)}
+.rt-role.n{background:var(--bg-light);color:var(--muted)}
+.rt-oc-note{font-size:10.5px;color:var(--success-dark);margin-top:6px;line-height:1.4}
+.rt-oc-trigger{font-size:10.5px;color:var(--medium);margin-top:6px;line-height:1.4}
+.rt-footnote{font-size:10.5px;color:var(--muted);margin-top:14px;padding-top:10px;border-top:1px solid var(--border-light);line-height:1.5}
+@media(max-width:700px){.rt-layout{flex-direction:column}.rt-arrow{display:none}.rt-outcomes{width:100%}.page{padding:20px 16px 48px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-brand">
+      <div class="nav-dot"><svg viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v8a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2zm-9 7H7v-2h4v2zm6-4H7V8h10v2z"/></svg></div>
+      <div><div class="nav-name">Grocery Delivery Co.</div><div class="nav-sub">Autonomous Delivery Pilot</div></div>
+    </div>
+    <span class="nav-tag">Routing Algorithm</span>
+  </div>
+</nav>
+<div class="page">
+  <p class="ph-label">Slide 4 — routing algorithm</p>
+  <h1 class="ph-title">A routing algorithm determines each delivery's path</h1>
+  <p class="ph-sub">Every incoming order passes four decision gates in real time. Select conditions to see which outcome fires.</p>
+  <div class="preset-row">
+    <button class="preset-btn" onclick="scene('medium_shop')">Standard shop</button>
+    <button class="preset-btn" onclick="scene('topup')">Top-up, ASAP</button>
+    <button class="preset-btn" onclick="scene('hotfood')">Hot food + drone</button>
+    <button class="preset-btn" onclick="scene('weekly')">Weekly shop</button>
+    <button class="preset-btn" onclick="scene('dense')">Manhattan address</button>
+    <button class="preset-btn" onclick="scene('storm')">Severe weather</button>
+    <button class="preset-btn" onclick="scene('no_optin')">No opt-in</button>
+  </div>
+  <div class="rt-banner" id="rt-banner">
+    <span class="rt-banner-label" id="rt-banner-label"></span>
+    <span class="rt-banner-reason" id="rt-banner-reason"></span>
+  </div>
+  <div class="rt-layout">
+    <div class="rt-inputs">
+      <div class="rt-bkt" id="bkt-field">
+        <div class="rt-bkt-hd"><div class="rt-dot" style="background:#3B82F6"></div>1 — Field conditions</div>
+        <div class="rt-row"><span class="rt-lbl">Geography</span><span class="rt-chip" data-g="geo" data-v="dense" onclick="sel(this)">Dense urban</span><span class="rt-chip on" data-g="geo" data-v="suburban" onclick="sel(this)">Connected suburban</span><span class="rt-chip" data-g="geo" data-v="open" onclick="sel(this)">Open suburban</span></div>
+        <div class="rt-row"><span class="rt-lbl">Weather</span><span class="rt-chip on" data-g="wx" data-v="clear" onclick="sel(this)">Clear (&lt;15 mph)</span><span class="rt-chip" data-g="wx" data-v="light" onclick="sel(this)">Light rain/snow</span><span class="rt-chip" data-g="wx" data-v="severe" onclick="sel(this)">Severe (&gt;25 mph)</span></div>
+      </div>
+      <div class="rt-bkt" id="bkt-customer">
+        <div class="rt-bkt-hd"><div class="rt-dot" style="background:#22C55E"></div>2 — Customer &amp; order profile</div>
+        <div class="rt-row"><span class="rt-lbl">Distance</span><span class="rt-chip on" data-g="dist" data-v="near" onclick="sel(this)">&lt;2 mi (sidewalk)</span><span class="rt-chip" data-g="dist" data-v="mid" onclick="sel(this)">2–7 mi (drone)</span><span class="rt-chip" data-g="dist" data-v="far" onclick="sel(this)">&gt;7 mi</span></div>
+        <div class="rt-row"><span class="rt-lbl">Address</span><span class="rt-chip on" data-g="acc" data-v="ok" onclick="sel(this)">Accessible</span><span class="rt-chip" data-g="acc" data-v="blocked" onclick="sel(this)">Inaccessible</span></div>
+        <div class="rt-row"><span class="rt-lbl">Basket</span><span class="rt-chip" data-g="basket" data-v="small" onclick="sel(this)">Small (1–2 bags)</span><span class="rt-chip on" data-g="basket" data-v="medium" onclick="sel(this)">Medium (3–5 bags)</span><span class="rt-chip" data-g="basket" data-v="large" onclick="sel(this)">Large (6+ bags)</span></div>
+        <div class="rt-row"><span class="rt-lbl">Timeline</span><span class="rt-chip on" data-g="tl" data-v="asap" onclick="sel(this)">ASAP (&lt;30 min)</span><span class="rt-chip" data-g="tl" data-v="sched" onclick="sel(this)">Scheduled</span><span class="rt-chip" data-g="tl" data-v="flex" onclick="sel(this)">Flexible</span></div>
+        <div class="rt-row"><span class="rt-lbl">Opt-in <span class="rt-badge gate">gate</span></span><span class="rt-chip gy" data-g="optin" data-v="yes" onclick="sGate(this,'optin','yes')">Opted in</span><span class="rt-chip" data-g="optin" data-v="no" onclick="sGate(this,'optin','no')">Not opted in</span></div>
+      </div>
+      <div class="rt-bkt" id="bkt-merchant">
+        <div class="rt-bkt-hd"><div class="rt-dot" style="background:#F59E0B"></div>3 — Merchant profile <span class="rt-badge">evaluated first</span></div>
+        <div class="rt-row"><span class="rt-lbl">Enrolled <span class="rt-badge gate">gate</span></span><span class="rt-chip gy" data-g="enroll" data-v="yes" onclick="sGate(this,'enroll','yes')">Enrolled</span><span class="rt-chip" data-g="enroll" data-v="no" onclick="sGate(this,'enroll','no')">Not enrolled</span></div>
+        <div class="rt-row"><span class="rt-lbl">Merchant</span><span class="rt-chip on" data-g="merch" data-v="grocery" onclick="sel(this)">Grocery</span><span class="rt-chip" data-g="merch" data-v="restaurant" onclick="sel(this)">Restaurant</span><span class="rt-chip" data-g="merch" data-v="cstore" onclick="sel(this)">C-store / pharmacy</span></div>
+      </div>
+      <div class="rt-bkt" id="bkt-avail">
+        <div class="rt-bkt-hd"><div class="rt-dot" style="background:#94A3B8"></div>4 — Availability</div>
+        <div class="rt-row"><span class="rt-lbl">Robot</span><span class="rt-chip on" data-g="robot" data-v="now" onclick="sel(this)">Available now</span><span class="rt-chip" data-g="robot" data-v="soon" onclick="sel(this)">Available soon (15–30 min)</span><span class="rt-chip" data-g="robot" data-v="unavail" onclick="sel(this)">Unavailable</span></div>
+        <div class="rt-row"><span class="rt-lbl">Shopper</span><span class="rt-chip on" data-g="shopper" data-v="high" onclick="sel(this)">High (3+/mi, &gt;70% accept)</span><span class="rt-chip" data-g="shopper" data-v="low" onclick="sel(this)">Low (1–2, &lt;50%)</span><span class="rt-chip" data-g="shopper" data-v="unavail" onclick="sel(this)">Unavailable</span></div>
+      </div>
+    </div>
+    <div class="rt-arrow">
+      <svg width="18" height="56" viewBox="0 0 18 56" fill="none"><line x1="9" y1="2" x2="9" y2="44" stroke="#CBD5E1" stroke-width="1.2" stroke-dasharray="3 2"/><path d="M3 40 L9 50 L15 40" stroke="#CBD5E1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="rt-outcomes">
+      <div style="font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Outcome</div>
+      <div class="rt-oc" id="oc-human">
+        <div class="rt-oc-title">Full human delivery</div>
+        <div class="rt-oc-desc">Shopper picks &amp; delivers end-to-end. Always the automatic fallback.</div>
+        <div class="rt-roles"><span class="rt-role n">Robot —</span><span class="rt-role y">Shopper ✓</span><span class="rt-role n">Retail assoc. —</span></div>
+        <div class="rt-oc-trigger" id="oc-human-note" style="display:none"></div>
+      </div>
+      <div class="rt-oc" id="oc-shopper">
+        <div class="rt-oc-title">Sidewalk robot + shopper</div>
+        <div class="rt-oc-desc">Shopper picks, loads robot at exit, takes next batch immediately.</div>
+        <div class="rt-roles"><span class="rt-role y">Robot ✓</span><span class="rt-role y">Shopper ✓</span><span class="rt-role n">Retail assoc. —</span></div>
+        <div class="rt-oc-note" id="oc-shopper-note" style="display:none">15–25 min recovered per batch</div>
+      </div>
+      <div class="rt-oc" id="oc-retail">
+        <div class="rt-oc-title">Robot + retail associate</div>
+        <div class="rt-oc-desc">Store associate picks small order, loads robot. No gig shopper.</div>
+        <div class="rt-roles"><span class="rt-role y">Robot ✓</span><span class="rt-role n">Shopper —</span><span class="rt-role y">Retail assoc. ✓</span></div>
+        <div class="rt-oc-note" id="oc-retail-note" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+  <p class="rt-footnote">* Robot availability is a live operational input. Human delivery is the automatic fallback whenever any hard gate or disqualifying condition is met — no manual intervention required.</p>
+</div>
+<script>
+const S={geo:'suburban',wx:'clear',dist:'near',acc:'ok',basket:'medium',tl:'asap',optin:'yes',enroll:'yes',merch:'grocery',robot:'now',shopper:'high'};
+function sel(el){const g=el.dataset.g,v=el.dataset.v;document.querySelectorAll('[data-g="'+g+'"]').forEach(c=>c.classList.remove('on'));el.classList.add('on');S[g]=v;compute();}
+function sGate(el,g,v){document.querySelectorAll('[data-g="'+g+'"]').forEach(c=>c.classList.remove('gy','gn'));el.classList.add(v==='yes'?'gy':'gn');S[g]=v;compute();}
+function compute(){
+  let out,reason,rtype='',fault=null;
+  if(S.enroll!=='yes'){out='human';reason='Hard gate — store not enrolled in pilot';fault='merchant';}
+  else if(S.optin!=='yes'){out='human';reason='Hard gate — customer has not opted in to robot delivery';fault='customer';}
+  else if(S.geo==='dense'){out='human';reason='Dense urban — congested sidewalks, no drone landing zones (e.g. Manhattan)';fault='field';}
+  else if(S.basket==='large'){out='human';reason='Large basket exceeds robot payload (6+ bags, 15+ lbs)';fault='customer';}
+  else if(S.wx==='severe'){out='human';reason='Severe weather — all robots grounded, safety protocol fires';fault='field';}
+  else if(S.dist==='far'){out='human';reason='Distance >7 mi — outside autonomous delivery range';fault='customer';}
+  else if(S.acc==='blocked'){out='human';reason='Inaccessible address — robot cannot complete final 50 ft handoff';fault='customer';}
+  else if(S.robot==='unavail'){out='human';reason='No robot available within 30 min — automatic human fallback';fault='avail';}
+  else if(S.basket==='small'&&S.wx==='clear'&&S.tl==='asap'){out='retail';rtype=S.dist==='mid'?'Drone dispatch (2–7 mi range)':'Sidewalk robot dispatch (<2 mi)';reason='Small top-up + ASAP + clear weather → store associate picks, robot delivers. '+rtype+'.';}
+  else if(S.geo==='suburban'&&S.dist==='near'&&S.basket==='medium'&&(S.wx==='clear'||S.wx==='light')&&(S.tl==='asap'||S.tl==='sched')&&S.shopper!=='unavail'){out='shopper';reason='Connected suburban, medium basket, shopper available → sidewalk robot handles last mile';}
+  else{out='human';reason='Conditions not fully met for autonomous delivery — routing to human fallback';}
+  ['field','customer','merchant','avail'].forEach(id=>document.getElementById('bkt-'+id).classList.toggle('fault',id===fault));
+  ['human','shopper','retail'].forEach(k=>{const c=document.getElementById('oc-'+k);c.classList.remove('win-r','win-h','dim');if(k===out)c.classList.add(k==='human'?'win-h':'win-r');else c.classList.add('dim');});
+  const hn=document.getElementById('oc-human-note');
+  if(out==='human'){hn.textContent='Trigger: '+reason;hn.style.display='block';}else hn.style.display='none';
+  document.getElementById('oc-shopper-note').style.display=(out==='shopper')?'block':'none';
+  const rn=document.getElementById('oc-retail-note');rn.style.display=(out==='retail')?'block':'none';if(out==='retail')rn.textContent=rtype;
+  const labels={human:'Full human delivery',shopper:'Sidewalk robot + shopper',retail:'Robot + retail associate'};
+  const banner=document.getElementById('rt-banner');
+  document.getElementById('rt-banner-label').textContent=labels[out];
+  document.getElementById('rt-banner-reason').textContent=' — '+reason;
+  banner.classList.toggle('win',out!=='human');
+}
+function scene(name){
+  const M={
+    medium_shop:{geo:'suburban',wx:'clear',dist:'near',acc:'ok',basket:'medium',tl:'asap',optin:'yes',enroll:'yes',merch:'grocery',robot:'now',shopper:'high'},
+    topup:{geo:'suburban',wx:'clear',dist:'near',acc:'ok',basket:'small',tl:'asap',optin:'yes',enroll:'yes',merch:'cstore',robot:'now',shopper:'high'},
+    hotfood:{geo:'open',wx:'clear',dist:'mid',acc:'ok',basket:'small',tl:'asap',optin:'yes',enroll:'yes',merch:'restaurant',robot:'now',shopper:'unavail'},
+    weekly:{geo:'suburban',wx:'clear',dist:'mid',acc:'ok',basket:'large',tl:'sched',optin:'yes',enroll:'yes',merch:'grocery',robot:'now',shopper:'high'},
+    dense:{geo:'dense',wx:'clear',dist:'near',acc:'ok',basket:'medium',tl:'asap',optin:'yes',enroll:'yes',merch:'grocery',robot:'now',shopper:'high'},
+    storm:{geo:'suburban',wx:'severe',dist:'near',acc:'ok',basket:'medium',tl:'asap',optin:'yes',enroll:'yes',merch:'grocery',robot:'now',shopper:'high'},
+    no_optin:{geo:'suburban',wx:'clear',dist:'near',acc:'ok',basket:'medium',tl:'asap',optin:'no',enroll:'yes',merch:'grocery',robot:'now',shopper:'high'}
+  };
+  const s=M[name];if(!s)return;
+  Object.assign(S,s);
+  Object.entries(s).forEach(([k,v])=>{
+    if(k==='optin'||k==='enroll'){document.querySelectorAll('[data-g="'+k+'"]').forEach(c=>c.classList.remove('gy','gn'));const t=document.querySelector('[data-g="'+k+'"][data-v="'+v+'"]');if(t)t.classList.add(v==='yes'?'gy':'gn');}
+    else{document.querySelectorAll('[data-g="'+k+'"]').forEach(c=>c.classList.remove('on'));const t=document.querySelector('[data-g="'+k+'"][data-v="'+v+'"]');if(t)t.classList.add('on');}
+  });
+  compute();
+}
+compute();
+</script>
+</body>
+</html>
